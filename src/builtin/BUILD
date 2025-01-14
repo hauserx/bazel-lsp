@@ -1,5 +1,12 @@
 load("@rules_rust_prost//:defs.bzl", "rust_prost_library")
 
+proto_library(
+    name = "builtin_proto",
+    srcs = [
+        "builtin.proto",
+    ],
+)
+
 rust_prost_library(
     name = "build_proto_rust",
     proto = "@bazel_tools//src/main/protobuf:build_proto",
@@ -8,7 +15,7 @@ rust_prost_library(
 
 rust_prost_library(
     name = "builtin_proto_rust",
-    proto = "@bazel_tools//src/main/protobuf:builtin_proto",
+    proto = ":builtin_proto",
     visibility = ["//visibility:public"],
 )
 
@@ -45,13 +52,13 @@ genrule(
     outs = ["builtin.pb"],
     tools = [
         "@protobuf//:protoc",
-        "@bazel_tools//src/main/protobuf:builtin_proto",
+        ":builtin_proto",
     ],
     cmd = "cat $(execpath :builtin.pbtxt) | " +
         "$(execpath @protobuf//:protoc) " +
         "--encode=builtin.Builtins " +
         "--deterministic_output " +
-        "--descriptor_set_in=$(execpath @bazel_tools//src/main/protobuf:builtin_proto) " +
+        "--descriptor_set_in=$(execpath :builtin_proto) " +
         "> $@",
     visibility = ["//visibility:public"],
 )
